@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encypt — Caesar Cipher Tool</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232e7d32'/><text x='16' y='23' font-size='20' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>E</text></svg>">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    padding: 36px 40px 28px;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #2e7d32;
+    letter-spacing: -.3px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #1b5e20;
+    margin: 2px 0 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 4px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 10px 12px;
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+    font-size: 13px;
+    background: #f1f8e9;
+    color: #1b5e20;
+    resize: vertical;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  textarea:focus { border-color: #2e7d32; }
+
+  .shift-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0;
+  }
+
+  .shift-row label { margin-bottom: 0; }
+
+  .shift-row input {
+    width: 100px;
+    padding: 8px 10px;
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+    font-size: 13px;
+    background: #f1f8e9;
+    color: #1b5e20;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .shift-row input:focus { border-color: #2e7d32; }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 20px;
+  }
+
+  .btn {
+    padding: 8px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+
+  .btn:active { transform: scale(.97); }
+
+  .btn-primary {
+    background: #2e7d32;
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: #1b5e20; }
+
+  .btn-secondary {
+    background: #f1f8e9;
+    color: #1b5e20;
+  }
+
+  .btn-secondary:hover { background: #dcedc8; }
+
+  .output-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .output-label label { margin-bottom: 0; }
+
+  .btn-copy {
+    padding: 3px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #2e7d32;
+    color: #fff;
+    transition: background .2s;
+  }
+
+  .btn-copy:hover { background: #1b5e20; }
+  .btn-copy:active { transform: scale(.97); }
+
+  #status {
+    margin-top: 16px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #2e7d32;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #status:empty { display: none; }
+
+  .error { border-color: #e53935 !important; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1b5e20;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Encypt</h1>
+  <p class="subtitle">Caesar Cipher — Encrypt and decrypt text with a secret shift key.</p>
+
+  <label for="input-text">Message</label>
+  <textarea id="input-text" placeholder="Type your message here..."></textarea>
+
+  <div class="shift-row">
+    <label for="shift-key">Secret Shift Key</label>
+    <input type="text" id="shift-key" placeholder="e.g. 3">
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-encrypt">Encrypt</button>
+    <button class="btn btn-primary" id="btn-decrypt">Decrypt</button>
+    <button class="btn btn-secondary" id="btn-clear">Clear</button>
+  </div>
+
+  <div class="output-label">
+    <label for="output-text">Output</label>
+    <button class="btn-copy" id="btn-copy">Copy to Clipboard</button>
+  </div>
+  <textarea id="output-text" placeholder="Result will appear here..." readonly></textarea>
+
+  <div id="status"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const inputText = document.getElementById('input-text');
+  const shiftKey  = document.getElementById('shift-key');
+  const outputText = document.getElementById('output-text');
+  const statusEl  = document.getElementById('status');
+  const toastEl   = document.getElementById('toast');
+
+  let toastTimer = null;
+
+  function caesarCipher(text, shift, decrypt) {
+    if (decrypt) shift = -shift;
+    let result = '';
+    for (const char of text) {
+      if (char >= 'A' && char <= 'Z') {
+        result += String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+      } else if (char >= 'a' && char <= 'z') {
+        result += String.fromCharCode((char.charCodeAt(0) - 97 + shift) % 26 + 97);
+      } else {
+        result += char;
+      }
+    }
+    return result;
+  }
+
+  function setStatus(msg, isError) {
+    statusEl.textContent = msg;
+    statusEl.style.background = isError ? '#c62828' : '#2e7d32';
+  }
+
+  function clearStatus() { statusEl.textContent = ''; }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+  }
+
+  function clearFields() {
+    inputText.value = '';
+    shiftKey.value = '';
+    outputText.value = '';
+    inputText.classList.remove('error');
+    shiftKey.classList.remove('error');
+    clearStatus();
+    inputText.focus();
+  }
+
+  function process(decrypt) {
+    const text  = inputText.value;
+    const shift = shiftKey.value.trim();
+    inputText.classList.remove('error');
+    shiftKey.classList.remove('error');
+
+    if (!shift) {
+      shiftKey.classList.add('error');
+      setStatus('Please enter a Secret Shift Key.', true);
+      shiftKey.focus();
+      return;
+    }
+
+    if (!/^-?\d+$/.test(shift)) {
+      shiftKey.classList.add('error');
+      setStatus('The shift key must be a whole number (e.g., 3).', true);
+      shiftKey.focus();
+      return;
+    }
+
+    if (!text) {
+      inputText.classList.add('error');
+      setStatus('Please enter a message to process.', true);
+      inputText.focus();
+      return;
+    }
+
+    try {
+      const output = caesarCipher(text, parseInt(shift, 10), decrypt);
+      outputText.value = output;
+      const action = decrypt ? 'Decryption' : 'Encryption';
+      setStatus(action + ' complete. Shift used: ' + shift + '.');
+    } catch (e) {
+      setStatus('An unexpected error occurred.', true);
+    }
+  }
+
+  function copyOutput() {
+    if (!outputText.value) {
+      showToast('Nothing to copy.');
+      return;
+    }
+    navigator.clipboard.writeText(outputText.value)
+      .then(() => showToast('Copied to clipboard!'))
+      .catch(() => showToast('Failed to copy.'));
+  }
+
+  document.getElementById('btn-encrypt').addEventListener('click', () => process(false));
+  document.getElementById('btn-decrypt').addEventListener('click', () => process(true));
+  document.getElementById('btn-clear')  .addEventListener('click', clearFields);
+  document.getElementById('btn-copy')   .addEventListener('click', copyOutput);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { process(false); e.preventDefault(); }
+    if (e.key === 'Enter' && e.shiftKey)                { process(true);  e.preventDefault(); }
+  });
+
+  inputText.focus();
+</script>
+</body>
+</html>
